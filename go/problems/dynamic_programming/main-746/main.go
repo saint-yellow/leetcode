@@ -49,9 +49,27 @@ func method2(cost []int) int {
 
 	p, q := cost[0], cost[1]
 	for i := 2; i < n; i++ {
-		p, q = q, minInt(p, q) + cost[i]
+		p, q = q, minInt(p, q)+cost[i]
 	}
 	return minInt(p, q)
+}
+
+func method3(cost []int) int {
+	n := len(cost)
+
+	if n == 0 {
+		return 0
+	}
+
+	if n == 1 {
+		return cost[0]
+	}
+
+	dp := make([]int, n+1)
+	for i := 2; i <= n; i++ {
+		dp[i] = minInt(dp[i-1]+cost[i-1], dp[i-2]+cost[i-2])
+	}
+	return dp[n]
 }
 
 func main() {
