@@ -2,21 +2,24 @@
 
 package main
 
-import "container/list"
-
 const base = 769
-
-type MyHashMap struct {
-	hm []list.List
-}
 
 type entry struct {
 	key, value int
+	next       *entry
+}
+
+type MyHashMap struct {
+	hm []*entry
 }
 
 func Constructor() MyHashMap {
+	hm := make([]*entry, base)
+	for i := range hm {
+		hm[i] = new(entry)
+	}
 	return MyHashMap{
-		hm: make([]list.List, base),
+		hm: hm,
 	}
 }
 
@@ -26,20 +29,21 @@ func (this *MyHashMap) hash(key int) int {
 
 func (this *MyHashMap) Put(key int, value int) {
 	h := this.hash(key)
-	for ele := this.hm[h].Front(); ele != nil; ele = ele.Next() {
-		if etr := ele.Value.(entry); etr.key == key {
-			ele.Value = entry{key, value}
+	var p *entry
+	for p = this.hm[h]; p.next != nil; p = p.next {
+		if p.next.key == key {
+			p.next.value = value
 			return
 		}
 	}
-	this.hm[h].PushBack(entry{key, value})
+	p.next = &entry{key, value, nil}
 }
 
 func (this *MyHashMap) Get(key int) int {
 	h := this.hash(key)
-	for ele := this.hm[h].Front(); ele != nil; ele = ele.Next() {
-		if etr := ele.Value.(entry); etr.key == key {
-			return etr.value
+	for p := this.hm[h]; p.next != nil; p = p.next {
+		if p.next.key == key {
+			return p.next.value
 		}
 	}
 	return -1
@@ -47,9 +51,10 @@ func (this *MyHashMap) Get(key int) int {
 
 func (this *MyHashMap) Remove(key int) {
 	h := this.hash(key)
-	for ele := this.hm[h].Front(); ele != nil; ele = ele.Next() {
-		if etr := ele.Value.(entry); etr.key == key {
-			this.hm[h].Remove(ele)
+	for p := this.hm[h]; p.next != nil; p = p.next {
+		if p.next.key == key {
+			p.next = p.next.next
+			return
 		}
 	}
 }
